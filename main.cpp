@@ -38,10 +38,21 @@ int main(int argc, const char * argv[])
     cout << "Successfully took the photo of the background" << endl;
     image.load_backgourd(photo);
     
-    cv::Mat remove_bg = remove_light(image.raw_image, image.background);
-    cv::imshow("remove_light", remove_bg);
+    cv::Mat removed_bg = remove_light(image.raw_image, image.background);
+//    cv::imshow("remove_light", removed_bg);
+//    cv::waitKey(0);
+    
+    cv::cvtColor(removed_bg, removed_bg, cv::COLOR_BGR2GRAY);
+    cv::threshold(removed_bg, removed_bg, 1, 255, cv::THRESH_BINARY);
+    
+    cout << removed_bg.dims;
+
+    cv::imshow("remove_light", removed_bg);
     cv::waitKey(0);
     
+    image.set_roi(removed_bg);
+    cv::imshow("roi", image.roi);
+    cv::waitKey(0);
     
     
 }

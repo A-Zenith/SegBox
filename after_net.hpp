@@ -28,21 +28,24 @@ class MyImage
     
 public:
     MyImage() = default;
-    MyImage(const cv::Mat image): raw_image(image){}; // init function
+    MyImage(const cv::Mat image): raw_image(image), height(image.rows), width(image.cols) {}; // init function
     
     void load_backgourd(const cv::Mat bg);
+    void set_roi(const cv::Mat removed_bg);
     //vector<cv::Mat> get_edge_n_sal(const cv::Mat image);
     //cv::Mat get_seg();
     cv::Mat raw_image;
     cv::Mat background;
+    cv::Mat roi;
 
 
 private:
+    cv::Rect change_size(cv::Rect rect, float ratio);
     int height;
     int width;
     int actual_height;
     //cv::Mat raw_image;
-    cv::Mat roi;
+    //cv::Mat roi;
     cv::Mat sal;
     cv::Mat sal_gray;
     cv::Mat sal_bin;

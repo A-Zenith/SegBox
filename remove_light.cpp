@@ -15,7 +15,10 @@
 
 cv::Mat remove_light(cv::Mat img, cv::Mat bg)
 {
+    cv::Mat img_0, bg_0;
+    cv::medianBlur(img, img_0, 7);
+    cv::medianBlur(bg, bg_0, 7);
     cv::Mat aux;
-    aux = bg - img;
+    aux = bg_0 - img_0  ;
     return aux;
 }
