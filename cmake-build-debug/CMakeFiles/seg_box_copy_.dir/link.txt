@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/seg_box_copy_.dir/main.cpp.o  -o seg_box_copy_ 

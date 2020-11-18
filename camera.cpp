@@ -8,16 +8,14 @@
 
 #include "camera.hpp"
 #include <stdio.h>
-#include <opencv2/core/types_c.h>
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/opencv.hpp"
 
 using namespace std;
 
 cv::Mat take_photo(void)
 {
     cout << "Pressing s to save a frame" << endl;
-    cv::VideoCapture capture(0);
+    cv::VideoCapture capture(2);
     cv::Mat result;
     while(true)
     {
@@ -29,6 +27,8 @@ cv::Mat take_photo(void)
         {
             result = frame;
             cv::destroyAllWindows();
+//            cv::imshow("ooo", result);
+//            cv::waitKey(0);
             return result;
         }
     }

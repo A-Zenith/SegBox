@@ -1,4 +1,4 @@
-//
+  //
 //  after_net.cpp
 //  SegBox
 //
@@ -8,13 +8,17 @@
 
 #include "after_net.hpp"
 #include <stdio.h>
-#include <string.h>
+#include <string>
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
-#include <opencv2/core/types_c.h>
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/opencv.hpp"
+#include "torch/torch.h"
+#include "torch/script.h"
+
+#include "dfi.h"
+
+#define PATH "/home/wy/CLionProjects/untitled/torch_test/cpp_model.pt"
 
 using namespace std;
 
@@ -35,32 +39,59 @@ cv::Mat to_bin(const cv::Mat img, string type)
     return bin;
 }
 
-void MyImage::load_backgourd(const cv::Mat bg)
-{
-    this->background = bg;
-}
 
 void MyImage::set_roi(const cv::Mat removed_bg)
 {
-    int x1=this->width, x2=0, y1=this->height, y2=0;
-    for(int i = 0; i < this->width; i++)
-        for(int j = 0; j < this->height; j++)
-            if(removed_bg.at<int>(i, j) != 0)
-            {
-                if(i < x1) x1 = i;
-                if(i > x1) x2 = i;
-                if(j < y1) y1 = j;
-                if(j > y2) y2 = j;
-            }
+    cv::Mat copy;
+    removed_bg.copyTo(copy);
+//    cv::imshow("rgb", copy);
+//    cv::waitKey(0);
+    cv::cvtColor(copy, copy, cv::COLOR_RGB2GRAY);
+//    cv::imshow("gray", copy);
+//    cv::waitKey(0);
+    cv::Mat element = getStructuringElement( 0,cv::Size(3,3), cv::Point(-1, -1));
+    cv::erode(copy, copy, element, cv::Point(-1,-1), 10);
+    cv::threshold(copy, copy, 1, 255, cv::THRESH_BINARY);
+//    cv::imshow("copy", copy);
+//    cv::waitKey(0);
+
+//    cout << copy << endl;
+//    return;
     
+    unsigned short x1=this->width, x2=0, y1=this->height, y2=0;
+    cout << this->width << " " << this->height << endl;
+    uchar zero = 255;
+//    size_t cnti = 0;
+//    size_t cntj = 0;
+    for(unsigned short i = 0; i < this->width; i++)
+        for(unsigned short j = 0; j < this->height; j++)
+        {
+//            cntj ++;
+//            cout << cntj << endl;
+            //cout << "reached here:" << "<" << i << "," << j << ">" << endl;
+            if (copy.at<uchar>(j, i) == zero)
+            {
+                //printf("%u\n", copy.at<uchar>(j, i));
+                if (i < x1) x1 = i;
+                if (i > x2) x2 = i;
+                if (j < y1) y1 = j;
+                if (j > y2) y2 = j;
+            }
+        }
+
+
     int roi_width = x2 - x1;
     int roi_height = y2 - y1;
-    cv::Rect rect(x1, y1, roi_width, roi_height);
-    rect = change_size(rect , 1.2);
     cout << "***************************" << endl;
-    cout << "x1:" << x1 << " x2:" << x2 << " width:" << width << " height" << height << endl;
+    cout << "x1:" << x1 << " y1:" << y1 << " width:" << roi_width << " height:" << roi_height << endl;
+    cout << "x2:" << x2 << " y2:" << y2 << endl;
+    cout << "raw_width:" << width << " raw_height:" << height << endl;
+    cv::Rect rect(x1, y1, roi_width, roi_height);
+    rect = change_size(rect , 1.7);
+
     this->roi = raw_image(rect);
-    
+    this->start_x = x1;
+    this->start_y = y1;
 }
 
 cv::Rect MyImage::change_size(cv::Rect rect, float ratio)
@@ -76,11 +107,96 @@ cv::Rect MyImage::change_size(cv::Rect rect, float ratio)
         new_x = 0;
     if(new_y < 0)
         new_y = 0;
-    if(new_width > this->width)
-        new_width = this->width;
-    if(new_height > this->height)
-        new_height = this->height;
+    if(new_width + new_x > this->width)
+        new_width = this->width -1 - new_x;
+    if(new_height + new_y > this->height)
+        new_height = this->height -1 - new_y;
+    cout << "new_x:" << new_x << " new_y:" << new_y << " new_width:" << new_width << " new_height" <<new_height <<endl;
+
     
     return cv::Rect(new_x, new_y, new_width, new_height);
     
 }
+
+void MyImage::set_sal()
+{
+
+//    cv::imshow("get_roi", this->roi);
+    cv::imwrite("tmp.png", this->roi);
+    this->roi = cv::imread("tmp.png");
+    std::vector<int64_t> sizes = {1, this->roi.rows, this->roi.cols, 3};
+    torch::TensorOptions options(at::kByte);
+    torch::Tensor input_tensor = torch::from_blob(this->roi.data, at::IntList(sizes), options);
+    //cout << img.data;
+    input_tensor = input_tensor.to(at::kFloat);
+    //cout << input_tensor;
+    std::vector<torch::jit::IValue> inputs;
+    inputs.push_back(input_tensor.permute({0, 3, 1, 2}));
+    //inputs.push_back(torch::ones({1,3,224,224}));
+    //cout << inputs;
+    //at::Tensor output = torch::sigmoid(inference_with_nn(inputs, PATH));
+    at::Tensor output = inference_with_nn(inputs, PATH);
+
+
+    //cout << output;
+    output = output.squeeze();
+    size_t width = output.size(1);
+    size_t height = output.size(0);
+    cv::Mat output_tmp(cv::Size(width, height) , CV_32FC1, output.data<float>());
+    cv::Mat network_output(output_tmp.size(), CV_8UC1);
+    float scale_factor_up = 255.0;
+    output_tmp.convertTo(network_output, CV_8U, scale_factor_up);
+    cv::Mat out = network_output;
+    this->sal_gray = out;
+    cv::threshold(out, this->sal_bin, 1, 255, cv::THRESH_BINARY);
+//    cv::imshow("sal", this->sal_bin);
+//    cv::waitKey(0);
+}
+
+vector<int> find_cord(MyImage img)
+{
+    int y1=img.sal_bin.rows, y2=0;
+
+    for(unsigned short i = 0; i < img.sal_bin.cols; i++)
+        for(unsigned short j = 0; j <img.sal_bin.cols; j++)
+        {
+//            cntj ++;
+//            cout << cntj << endl;
+            //cout << "reached here:" << "<" << i << "," << j << ">" << endl;
+            if (img.sal_bin.at<uchar>(j, i) == 255)
+            {
+                if(j < y1)
+                    y1 = j;
+                if(j > y2)
+                    y2 = j;
+            }
+        }
+    y1 += img.start_y;
+    y2 += img.start_y;
+    vector<int> ys = {y1, y2};
+    return ys;
+}
+
+cv::Mat MyImage::remove_light()
+{
+    cv::Mat img_0, bg_0;
+//    this->raw_image.copyTo(img_0);
+//    this->background.copyTo(bg_0);
+
+    cv::medianBlur(this->raw_image, img_0, 3);
+    cv::medianBlur(background, bg_0, 3);
+    cv::medianBlur(img_0, img_0, 3);
+    cv::medianBlur(bg_0, bg_0, 3);
+
+
+    cv::Mat aux;
+    aux = img_0 - bg_0  ;
+    return aux;
+}
+
+void MyImage::set_bg(cv::Mat& bg)
+{
+    background = bg;
+}
+
+cv::Mat MyImage::background = cv::Mat::zeros(4, 4, 0);
