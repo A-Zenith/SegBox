@@ -1,5 +1,4 @@
 //
-// Created by 周锦凡 on 2020/11/8.
 //
 #include "torch/torch.h"
 #include "torch/script.h"

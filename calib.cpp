@@ -31,13 +31,6 @@ float calib_proc()
     cv::Mat removed_bg = calib.remove_light();
     calib.set_roi(removed_bg);
 
-
-//    cv::imshow("rgb", removed_bg);
-//    cv::waitKey(0);
-
-//    cv::imshow("roi", calib.roi);
-//    cv::waitKey(0);
-
     calib.set_sal();
     vector<int> ys = find_cord(calib);  // some bug here
     y1 = ys[0];

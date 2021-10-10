@@ -1,3 +1,6 @@
+// The code was modified from the photomontage project
+// https://grail.cs.washington.edu/projects/photomontage/release/
+
 #include "collage.h"
 
 #include <math.h>
@@ -25,8 +28,6 @@ int Collage::getImageWidth() {
 
 //alpha_expansion avec plus de deux sources
 cv::Mat Collage::computePhotomontage(INSIDE_MODE insideMode, OUTSIDE_MODE outsideMode) {
-	//cout << "Computing photomontage" << endl;
-	/* Labels to be put on result image */
 	Mat resultLabel(D->height, D->width, CV_8UC1);
 	for (int i = 0; i < D->height; i++) {
 		for (int j = 0; j < D->width; j++) {

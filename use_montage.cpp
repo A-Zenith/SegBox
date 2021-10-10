@@ -1,3 +1,6 @@
+// The code was modified from the photomontage project
+// https://grail.cs.washington.edu/projects/photomontage/release/
+
 #include "opencv2/opencv.hpp"
 #include <iostream>
 #include <string>

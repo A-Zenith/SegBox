@@ -2,7 +2,6 @@
 //  camera.hpp
 //  SegBox
 //
-//  Created by 周锦凡 on 2020/11/5.
 //  Copyright © 2020 zjf. All rights reserved.
 //
 

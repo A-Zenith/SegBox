@@ -1,6 +1,4 @@
 //
-// Created by 周锦凡 on 2020/11/8.
-//
 
 #ifndef SEG_BOX_DFI_H
 #define SEG_BOX_DFI_H

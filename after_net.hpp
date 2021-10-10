@@ -21,7 +21,6 @@ cv::Mat to_bin(cv::Mat img, string type);
 class MyImage
 {
     
-    //friend cv::Mat to_threshold(cv::Mat img);
     friend vector<int> find_cord(MyImage img);
 
 public:

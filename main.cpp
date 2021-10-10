@@ -2,7 +2,6 @@
 //  main.cpp
 //  SegBox
 //
-//  Created by 周锦凡 on 2020/11/2.
 //  Copyright © 2020 zjf. All rights reserved.
 //
 
@@ -31,30 +30,8 @@ int main(int argc, const char * argv[])
     cout << "Successfully took the photo of the object" << endl;
     MyImage image(photo);
 
-//    cv::imshow("object", image.raw_image);
-//    cv::waitKey(0);
-
-//    cout << "Now remove the object and take a photo of the background" << endl;
-//    photo = take_photo();
-//    if(photo.cols == 0)
-//        throw "Failed to take a photo of the background";
-//    cout << "Successfully took the photo of the background" << endl;
-
     cv::Mat removed_bg = image.remove_light();
-//    cv::imshow("remove_light", removed_bg);
-//    cv::waitKey(0);
-
-//    cv::cvtColor(removed_bg, removed_bg, cv::COLOR_BGR2GRAY);
-//    cv::threshold(removed_bg, removed_bg, 1, 255, cv::THRESH_BINARY);
-//
-//    cout << removed_bg.dims;
-//
-//    cv::imshow("remove_light", removed_bg);
-//    cv::waitKey(0);
-    cout << "happy?>>>>" << endl;
     image.set_roi(removed_bg);
-//    cv::imshow("roi", image.roi);
-//    cv::waitKey(0);
     image.set_sal();
     vector<int> ys = find_cord(image);  // some bug here
     int y1 = ys[0];
@@ -72,12 +49,8 @@ int main(int argc, const char * argv[])
     cv::Mat tmp = image.roi.clone();
     tmp.copyTo(black, lala);
     cv::Mat m_result = use_montage(image);
-    //cv::imshow("result", black);
-//    cv::imshow("m_result", m_result);
-//    cv::waitKey(0);
 
     cv::imwrite("/home/wy/CLionProjects/untitled/seg_box(copy)/seg_result.png", m_result);
     ofstream out("/home/wy/CLionProjects/untitled/seg_box(copy)/height.txt");
     out << to_string(image.actual_height);
-
 }

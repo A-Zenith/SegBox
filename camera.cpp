@@ -2,7 +2,6 @@
 //  camera.cpp
 //  SegBox
 //
-//  Created by 周锦凡 on 2020/11/5.
 //  Copyright © 2020 zjf. All rights reserved.
 //
 
@@ -27,8 +26,6 @@ cv::Mat take_photo(void)
         {
             result = frame;
             cv::destroyAllWindows();
-//            cv::imshow("ooo", result);
-//            cv::waitKey(0);
             return result;
         }
     }

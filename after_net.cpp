@@ -2,7 +2,6 @@
 //  after_net.cpp
 //  SegBox
 //
-//  Created by 周锦凡 on 2020/11/2.
 //  Copyright © 2020 zjf. All rights reserved.
 //
 
@@ -18,14 +17,9 @@
 
 #include "dfi.h"
 
-#define PATH "/home/wy/CLionProjects/untitled/torch_test/cpp_model.pt"
+#define PATH "/home/zjf/CLionProjects/untitled/torch_test/cpp_model.pt"
 
 using namespace std;
-
-//cv::Mat MyImage::get_seg()
-//{
-//
-//}
 
 cv::Rect change_size(cv::Rect rect, float ratio);
 
@@ -44,31 +38,17 @@ void MyImage::set_roi(const cv::Mat removed_bg)
 {
     cv::Mat copy;
     removed_bg.copyTo(copy);
-//    cv::imshow("rgb", copy);
-//    cv::waitKey(0);
     cv::cvtColor(copy, copy, cv::COLOR_RGB2GRAY);
-//    cv::imshow("gray", copy);
-//    cv::waitKey(0);
     cv::Mat element = getStructuringElement( 0,cv::Size(3,3), cv::Point(-1, -1));
     cv::erode(copy, copy, element, cv::Point(-1,-1), 10);
     cv::threshold(copy, copy, 1, 255, cv::THRESH_BINARY);
-//    cv::imshow("copy", copy);
-//    cv::waitKey(0);
 
-//    cout << copy << endl;
-//    return;
-    
     unsigned short x1=this->width, x2=0, y1=this->height, y2=0;
     cout << this->width << " " << this->height << endl;
     uchar zero = 255;
-//    size_t cnti = 0;
-//    size_t cntj = 0;
     for(unsigned short i = 0; i < this->width; i++)
         for(unsigned short j = 0; j < this->height; j++)
         {
-//            cntj ++;
-//            cout << cntj << endl;
-            //cout << "reached here:" << "<" << i << "," << j << ">" << endl;
             if (copy.at<uchar>(j, i) == zero)
             {
                 //printf("%u\n", copy.at<uchar>(j, i));
@@ -121,24 +101,17 @@ cv::Rect MyImage::change_size(cv::Rect rect, float ratio)
 void MyImage::set_sal()
 {
 
-//    cv::imshow("get_roi", this->roi);
     cv::imwrite("tmp.png", this->roi);
     this->roi = cv::imread("tmp.png");
     std::vector<int64_t> sizes = {1, this->roi.rows, this->roi.cols, 3};
     torch::TensorOptions options(at::kByte);
     torch::Tensor input_tensor = torch::from_blob(this->roi.data, at::IntList(sizes), options);
-    //cout << img.data;
     input_tensor = input_tensor.to(at::kFloat);
-    //cout << input_tensor;
     std::vector<torch::jit::IValue> inputs;
     inputs.push_back(input_tensor.permute({0, 3, 1, 2}));
-    //inputs.push_back(torch::ones({1,3,224,224}));
-    //cout << inputs;
-    //at::Tensor output = torch::sigmoid(inference_with_nn(inputs, PATH));
     at::Tensor output = inference_with_nn(inputs, PATH);
 
 
-    //cout << output;
     output = output.squeeze();
     size_t width = output.size(1);
     size_t height = output.size(0);
@@ -149,8 +122,6 @@ void MyImage::set_sal()
     cv::Mat out = network_output;
     this->sal_gray = out;
     cv::threshold(out, this->sal_bin, 1, 255, cv::THRESH_BINARY);
-//    cv::imshow("sal", this->sal_bin);
-//    cv::waitKey(0);
 }
 
 vector<int> find_cord(MyImage img)
@@ -160,9 +131,6 @@ vector<int> find_cord(MyImage img)
     for(unsigned short i = 0; i < img.sal_bin.cols; i++)
         for(unsigned short j = 0; j <img.sal_bin.cols; j++)
         {
-//            cntj ++;
-//            cout << cntj << endl;
-            //cout << "reached here:" << "<" << i << "," << j << ">" << endl;
             if (img.sal_bin.at<uchar>(j, i) == 255)
             {
                 if(j < y1)
@@ -180,8 +148,6 @@ vector<int> find_cord(MyImage img)
 cv::Mat MyImage::remove_light()
 {
     cv::Mat img_0, bg_0;
-//    this->raw_image.copyTo(img_0);
-//    this->background.copyTo(bg_0);
 
     cv::medianBlur(this->raw_image, img_0, 3);
     cv::medianBlur(background, bg_0, 3);
