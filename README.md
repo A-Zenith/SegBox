@@ -8,7 +8,7 @@ We first simply use background subtraction to get the region of interest of the 
 
 ![IMG_7854](https://github.com/A-Zenith/SegBox/blob/main/imgs/IMG_7854.JPG)
 
-![IMG_7855](https://github.com/A-Zenith/SegBox/blob/main/imgs/IMG_7855.JPG)
+![IMG_7855](https://github.com/A-Zenith/SegBox/blob/main/imgs/IMG_7855.PNG)
 
 
 ![IMG_7855](https://github.com/A-Zenith/SegBox/blob/main/imgs/IMG_7856.PNG)
