@@ -2,7 +2,7 @@ This is code for the Segmentation Box project.
 
 The project aims to make a box which is able to automatically segment out the main object in an enclosed box.
 
-The setting is as shown in the picture:![IMG_7853](https://github.com/A-Zenith/SegBox/blob/main/imgs/IMG_7863.PNG)
+The setting is as shown in the picture:![IMG_7853](https://github.com/A-Zenith/SegBox/blob/main/imgs/IMG_7853.PNG)
 
 We first simply use background subtraction to get the region of interest of the object:
 
